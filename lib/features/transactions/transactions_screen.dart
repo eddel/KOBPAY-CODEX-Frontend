@@ -51,7 +51,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               itemBuilder: (context, index) {
                 final tx = _transactions[index];
                 final amount = tx["amountKobo"] as int? ?? 0;
-                final status = tx["status"]?.toString() ?? "unknown";
+                final status = formatStatusLabel(
+                    tx["status"]?.toString() ?? "unknown");
                 final category = tx["category"]?.toString() ?? "";
                 final meta = tx["metaJson"] is Map
                     ? Map<String, dynamic>.from(tx["metaJson"] as Map)

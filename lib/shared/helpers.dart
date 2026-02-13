@@ -95,3 +95,16 @@ List<Map<String, dynamic>> asStringKeyMapList(dynamic value) {
   }
   return <Map<String, dynamic>>[];
 }
+
+String formatStatusLabel(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return raw;
+  final normalized = trimmed.toLowerCase();
+  if (normalized == "successfull" ||
+      normalized == "successful" ||
+      normalized == "success" ||
+      normalized == "completed") {
+    return "Success";
+  }
+  return trimmed;
+}

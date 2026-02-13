@@ -330,7 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 final amountText =
                     "${isCredit ? "+" : "-"}${formatKobo(amount, currency: currency)}";
                 final dateText = _formatTxDate(tx["createdAt"]);
-                final status = pickString(tx, ["status", "state"], "unknown");
+                final status = formatStatusLabel(
+                    pickString(tx, ["status", "state"], "unknown"));
                 final icon =
                     _iconForCategory(tx["category"]?.toString() ?? "");
                 final meta = asStringKeyMap(tx["metaJson"]);
