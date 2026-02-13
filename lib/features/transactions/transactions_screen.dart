@@ -4,6 +4,7 @@ import "../../store/session_store.dart";
 import "../../shared/helpers.dart";
 import "../../shared/widgets.dart";
 import "exchange_transaction_detail_screen.dart";
+import "transaction_detail_screen.dart";
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -84,20 +85,29 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       )
                     : formatKobo(amount);
 
+                final canOpenExchangeDetail = isExchange && meta["tradeId"] != null;
+                final VoidCallback? onTap = canOpenExchangeDetail
+                    ? () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ExchangeTransactionDetailScreen(
+                              transaction: tx
+                            )
+                          )
+                        )
+                    : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => TransactionDetailScreen(
+                              transaction: tx
+                            )
+                          )
+                        );
+
                 return SectionCard(
                   child: ListTile(
                     title: Text(title),
                     subtitle: Text(subtitle),
                     trailing: Text(amountText),
-                    onTap: isExchange && meta["tradeId"] != null
-                        ? () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ExchangeTransactionDetailScreen(
-                                  transaction: tx
-                                )
-                              )
-                            )
-                        : null
+                    onTap: onTap
                   )
                 );
               }

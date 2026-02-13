@@ -9,6 +9,7 @@ import "../../shared/in_app_browser.dart";
 import "../../shared/widgets.dart";
 import "../../store/session_store.dart";
 import "../transactions/exchange_transaction_detail_screen.dart";
+import "../transactions/transaction_detail_screen.dart";
 import "../wallet/fund_sheet.dart";
 
 class HomeScreen extends StatefulWidget {
@@ -335,9 +336,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 final icon =
                     _iconForCategory(tx["category"]?.toString() ?? "");
                 final meta = asStringKeyMap(tx["metaJson"]);
-                final canOpenDetail =
-                    (tx["category"]?.toString() ?? "") == "exchange" &&
-                        meta["tradeId"] != null;
+                final isExchange =
+                    (tx["category"]?.toString() ?? "") == "exchange";
+                final canOpenExchangeDetail = isExchange && meta["tradeId"] != null;
+                final VoidCallback? onTap = canOpenExchangeDetail
+                    ? () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ExchangeTransactionDetailScreen(
+                              transaction: tx
+                            )
+                          )
+                        )
+                    : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => TransactionDetailScreen(
+                              transaction: tx
+                            )
+                          )
+                        );
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _TransactionTile(
@@ -347,15 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     status: status,
                     isCredit: isCredit,
                     icon: icon,
-                    onTap: canOpenDetail
-                        ? () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ExchangeTransactionDetailScreen(
-                                  transaction: tx
-                                )
-                              )
-                            )
-                        : null
+                    onTap: onTap
                   )
                 );
               })
