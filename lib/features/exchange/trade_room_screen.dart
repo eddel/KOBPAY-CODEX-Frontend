@@ -125,8 +125,7 @@ class _TradeRoomScreenState extends State<TradeRoomScreen> {
   }
 
   String _formatMinor(int minor, String currency) {
-    final amount = (minor / 100).toStringAsFixed(2);
-    return "${currency.toUpperCase()} $amount";
+    return formatMinorAmount(minor, currency: currency);
   }
 
   String _formatCountdown(Duration duration) {

@@ -5,6 +5,7 @@ import "package:path_provider/path_provider.dart";
 import "package:provider/provider.dart";
 import "package:share_plus/share_plus.dart";
 import "../../core/config/app_config.dart";
+import "../../shared/helpers.dart";
 import "../../shared/widgets.dart";
 import "../../store/session_store.dart";
 
@@ -17,7 +18,7 @@ class ExchangeTransactionDetailScreen extends StatelessWidget {
   final Map<String, dynamic> transaction;
 
   String _formatMinor(int minor, String currency) {
-    return "${currency.toUpperCase()} ${(minor / 100).toStringAsFixed(2)}";
+    return formatMinorAmount(minor, currency: currency);
   }
 
   String _maskAccount(String value) {

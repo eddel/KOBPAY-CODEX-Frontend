@@ -63,14 +63,24 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 final fromAmountMinor =
                     rawFromAmount is num ? rawFromAmount.round() : 0;
                 final completedAtRaw = meta["completedAt"]?.toString() ?? "";
-                final title = isExchange && fromCurrency.isNotEmpty && toCurrency.isNotEmpty
+                final isFunding = isWalletFunding(tx);
+                final title = isExchange &&
+                        fromCurrency.isNotEmpty &&
+                        toCurrency.isNotEmpty
                     ? "Exchange $fromCurrency→$toCurrency"
-                    : category.toUpperCase();
+                    : isFunding
+                        ? "Deposit"
+                        : category.isEmpty
+                            ? "TRANSACTION"
+                            : category.toUpperCase();
                 final subtitle = completedAtRaw.isNotEmpty
                     ? completedAtRaw
                     : status;
                 final amountText = isExchange && fromCurrency.isNotEmpty
-                    ? "${fromCurrency.toUpperCase()} ${(fromAmountMinor / 100).toStringAsFixed(2)}"
+                    ? formatMinorAmount(
+                        fromAmountMinor,
+                        currency: fromCurrency
+                      )
                     : formatKobo(amount);
 
                 return SectionCard(

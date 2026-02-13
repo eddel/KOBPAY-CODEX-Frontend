@@ -160,7 +160,7 @@ class _DataScreenState extends State<DataScreen> {
                             return ListTile(
                               title: Text(plan.displayName),
                               subtitle: Text(
-                                "NGN ${plan.priceNgn.toStringAsFixed(2)}"
+                                formatAmount(plan.priceNgn, currency: "NGN")
                               ),
                               onTap: () =>
                                   Navigator.of(sheetContext).pop(plan)

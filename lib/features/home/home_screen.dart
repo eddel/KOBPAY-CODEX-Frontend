@@ -316,12 +316,15 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else
               ...transactions.take(4).map((tx) {
-                final title = pickString(tx, [
-                  "title",
-                  "category",
-                  "provider",
-                  "reference"
-                ], "Transaction");
+                final isFunding = isWalletFunding(tx);
+                final title = isFunding
+                    ? "Deposit"
+                    : pickString(tx, [
+                        "title",
+                        "category",
+                        "provider",
+                        "reference"
+                      ], "Transaction");
                 final amount = tx["amountKobo"] as int? ?? 0;
                 final isCredit = _isCredit(tx);
                 final amountText =
@@ -617,14 +620,15 @@ class _BalanceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Flexible(
-                      child: Text(
-                        balanceText,
+                    Expanded(
+                      child: _ScaleDownText(
+                        text: balanceText,
+                        alignment: Alignment.centerLeft,
                         style: Theme.of(context)
                             .textTheme
                             .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.w700)
-                      )
+                      ),
                     ),
                     IconButton(
                       onPressed: onToggle,
@@ -960,77 +964,124 @@ class _TransactionTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppTheme.stone)
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 44,
-                width: 44,
-                decoration: BoxDecoration(
-                  color: AppTheme.background,
-                  borderRadius: BorderRadius.circular(12)
-                ),
-                child: Icon(icon, color: AppTheme.seed)
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final rawAmountWidth = constraints.maxWidth * 0.32;
+              final amountWidth =
+                  rawAmountWidth.clamp(72.0, 140.0) as double;
+              return Row(
+                children: [
+                  Container(
+                    height: 44,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      color: AppTheme.background,
+                      borderRadius: BorderRadius.circular(12)
+                    ),
+                    child: Icon(icon, color: AppTheme.seed)
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w600)
-                          )
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w600)
+                              )
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(12)
+                              ),
+                              child: Text(
+                                status.toUpperCase(),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                        color: statusColor,
+                                        fontWeight: FontWeight.w600)
+                              )
+                            )
+                          ]
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12)
-                          ),
-                          child: Text(
-                            status.toUpperCase(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                    color: statusColor,
-                                    fontWeight: FontWeight.w600)
-                          )
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.black54)
                         )
                       ]
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.black54)
                     )
-                  ]
-                )
-              ),
-              const SizedBox(width: 8),
-              Text(
-                amount,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: isCredit ? Colors.green : Colors.redAccent,
-                      fontWeight: FontWeight.w700
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: amountWidth,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _ScaleDownText(
+                        text: amount,
+                        alignment: Alignment.centerRight,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color:
+                                  isCredit ? Colors.green : Colors.redAccent,
+                              fontWeight: FontWeight.w700
+                            )
+                      )
                     )
-              )
-            ]
+                  )
+                ]
+              );
+            }
           )
         )
+      )
+    );
+  }
+}
+
+class _ScaleDownText extends StatelessWidget {
+  const _ScaleDownText({
+    required this.text,
+    required this.style,
+    this.alignment = Alignment.centerLeft,
+    this.maxLines = 1,
+    this.textAlign
+  });
+
+  final String text;
+  final TextStyle? style;
+  final Alignment alignment;
+  final int maxLines;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        text,
+        maxLines: maxLines,
+        softWrap: false,
+        overflow: TextOverflow.visible,
+        textAlign: textAlign,
+        style: style
       )
     );
   }

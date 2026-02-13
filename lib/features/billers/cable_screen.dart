@@ -221,7 +221,7 @@ class _CableScreenState extends State<CableScreen> {
                             return ListTile(
                               title: Text(plan.displayName),
                               subtitle: Text(
-                                "NGN ${plan.priceNgn.toStringAsFixed(2)}"
+                                formatAmount(plan.priceNgn, currency: "NGN")
                               ),
                               onTap: () =>
                                   Navigator.of(sheetContext).pop(plan)

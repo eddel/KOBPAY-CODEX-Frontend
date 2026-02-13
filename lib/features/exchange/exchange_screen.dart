@@ -2,6 +2,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "../../core/theme/app_theme.dart";
+import "../../shared/helpers.dart";
 import "../../shared/widgets.dart";
 import "../../store/session_store.dart";
 import "trade_room_screen.dart";
@@ -88,8 +89,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
   }
 
   String _formatMinor(int minor, String currency) {
-    final amount = (minor / 100).toStringAsFixed(2);
-    return "${currency.toUpperCase()} $amount";
+    return formatMinorAmount(minor, currency: currency);
   }
 
   Future<void> _fetchRate() async {
