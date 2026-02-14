@@ -72,7 +72,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       ["reference"],
       pickString(tx, ["providerRef", "reference", "id"], "")
     );
-    final provider = pickString(receipt, ["provider"], pickString(tx, ["provider"], ""));
     final category = pickString(receipt, ["category"], pickString(tx, ["category"], ""));
     final type = pickString(receipt, ["type"], pickString(tx, ["type"], ""));
     final createdAt = pickString(receipt, ["createdAt"], pickString(tx, ["createdAt"], ""));
@@ -86,7 +85,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       items: [
         ReceiptItem(label: "Category", value: category.isEmpty ? "Transaction" : category),
         if (type.isNotEmpty) ReceiptItem(label: "Type", value: type),
-        if (provider.isNotEmpty) ReceiptItem(label: "Provider", value: provider),
         ReceiptItem(label: "Fee", value: formatKobo(feeKobo)),
         ReceiptItem(label: "Total", value: formatKobo(totalKobo))
       ]
@@ -114,12 +112,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       fileNamePrefix: "kobpay_transaction"
                     )
                   ),
-                  const SizedBox(height: 12),
-                  SecondaryButton(
-                    label: "Refresh",
-                    icon: Icons.refresh,
-                    onPressed: _loadReceipt
-                  )
+                  const SizedBox(height: 12)
                 ]
               )
             )

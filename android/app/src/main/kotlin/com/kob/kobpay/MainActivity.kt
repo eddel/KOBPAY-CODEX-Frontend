@@ -1,4 +1,4 @@
-package com.example.kobpay_mobile
+package com.kob.kobpay
 
 import io.flutter.embedding.android.FlutterActivity
 
