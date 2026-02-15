@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:convert";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:provider/provider.dart";
 import "../../core/theme/app_theme.dart";
 import "../../shared/helpers.dart";
@@ -24,28 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _bannerController = PageController(viewportFraction: 0.92);
   Timer? _bannerTimer;
   int _bannerIndex = 0;
-  static const int _maxBannerBytes = 5 * 1024 * 1024;
-
-  static final List<_DashboardBanner> _banners = [
-    _DashboardBanner(
-      title: "Fund Your Wallet",
-      subtitle: "Top up instantly with cards or bank transfer.",
-      imageAsset: "assets/banners/banner1.jpg",
-      linkUrl: "https://kobpay.com/fund"
-    ),
-    _DashboardBanner(
-      title: "Pay Bills Faster",
-      subtitle: "Airtime, data, and utilities in one place.",
-      imageAsset: "assets/banners/banner2.jpg",
-      linkUrl: "https://kobpay.com/bills"
-    ),
-    _DashboardBanner(
-      title: "Keep It Secure",
-      subtitle: "Enable PIN and biometrics from Profile.",
-      imageAsset: "assets/banners/banner3.jpg",
-      linkUrl: "https://kobpay.com/security"
-    )
-  ];
+  List<_DashboardBanner> _banners = [];
 
   @override
   void initState() {
@@ -54,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final session = context.read<SessionStore>();
       try {
+        await session.fetchBanners();
         if (session.wallet == null) {
           await session.fetchWallet();
         }
@@ -73,6 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final session = Provider.of<SessionStore>(context);
+    final nextBanners = _mapBanners(session.banners);
+    if (!_sameBanners(_banners, nextBanners)) {
+      _banners = nextBanners;
+      _bannerIndex = 0;
+      _startBannerTimer();
+    }
+  }
+
   void _startBannerTimer() {
     _bannerTimer?.cancel();
     if (_banners.length < 2) return;
@@ -89,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refresh(SessionStore session) async {
     try {
+      await session.fetchBanners();
       await session.fetchWallet();
       await session.fetchRecentTransactions(limit: 5);
     } catch (err) {
@@ -99,29 +91,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openBanner(_DashboardBanner banner) async {
-    final validAsset = await _validateBannerAsset(banner.imageAsset);
-    if (!validAsset) {
-      if (mounted) {
-        showMessage(context, "Banner must be a JPG under 5MB");
-      }
-      return;
-    }
+    if (banner.linkUrl == null || banner.linkUrl!.isEmpty) return;
     if (mounted) {
-      await openInAppBrowser(context, banner.linkUrl);
+      await openInAppBrowser(context, banner.linkUrl!);
     }
   }
 
-  Future<bool> _validateBannerAsset(String assetPath) async {
-    final lower = assetPath.toLowerCase();
-    if (!(lower.endsWith(".jpg") || lower.endsWith(".jpeg"))) {
-      return false;
+  List<_DashboardBanner> _mapBanners(List<Map<String, dynamic>>? raw) {
+    if (raw == null) return [];
+    return raw
+        .map(
+          (entry) => _DashboardBanner(
+            id: entry["id"]?.toString() ?? "",
+            title: entry["title"]?.toString(),
+            subtitle: entry["subtitle"]?.toString(),
+            imageUrl: entry["imageUrl"]?.toString() ?? "",
+            linkUrl: entry["linkUrl"]?.toString()
+          )
+        )
+        .where((banner) => banner.imageUrl.isNotEmpty)
+        .toList();
+  }
+
+  bool _sameBanners(List<_DashboardBanner> current, List<_DashboardBanner> next) {
+    if (current.length != next.length) return false;
+    for (int i = 0; i < current.length; i++) {
+      if (current[i].id != next[i].id ||
+          current[i].imageUrl != next[i].imageUrl) {
+        return false;
+      }
     }
-    try {
-      final data = await rootBundle.load(assetPath);
-      return data.lengthInBytes <= _maxBannerBytes;
-    } catch (_) {
-      return false;
-    }
+    return true;
   }
 
   String _firstName(Map<String, dynamic>? user) {
@@ -224,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final transactions = session.recentTransactions ?? [];
     final walletLoading = wallet == null;
     final transactionsLoading = session.recentTransactions == null;
+    final hasBanners = _banners.isNotEmpty;
     final balanceText = _showBalance
         ? formatKobo(balanceKobo, currency: currency)
         : "${currency.toUpperCase()} \u2022\u2022\u2022\u2022\u2022";
@@ -289,16 +290,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ]
             ),
             const SizedBox(height: 20),
-            const _SectionHeader(title: "Highlights"),
-            const SizedBox(height: 12),
-            _BannerCarousel(
-              controller: _bannerController,
-              banners: _banners,
-              index: _bannerIndex,
-              onChanged: (index) => setState(() => _bannerIndex = index),
-              onTap: _openBanner
-            ),
-            const SizedBox(height: 20),
+            if (hasBanners) ...[
+              const _SectionHeader(title: "Highlights"),
+              const SizedBox(height: 12),
+              _BannerCarousel(
+                controller: _bannerController,
+                banners: _banners,
+                index: _bannerIndex,
+                onChanged: (index) => setState(() => _bannerIndex = index),
+                onTap: _openBanner
+              ),
+              const SizedBox(height: 20),
+            ],
             _SectionHeader(
               title: "Transactions",
               actionLabel: "View all >",
@@ -768,16 +771,18 @@ class _QuickLinkTile extends StatelessWidget {
 
 class _DashboardBanner {
   const _DashboardBanner({
-    required this.title,
-    required this.subtitle,
-    required this.imageAsset,
-    required this.linkUrl
+    required this.id,
+    required this.imageUrl,
+    this.title,
+    this.subtitle,
+    this.linkUrl
   });
 
-  final String title;
-  final String subtitle;
-  final String imageAsset;
-  final String linkUrl;
+  final String id;
+  final String imageUrl;
+  final String? title;
+  final String? subtitle;
+  final String? linkUrl;
 }
 
 class _BannerCarousel extends StatelessWidget {
@@ -869,9 +874,18 @@ class _BannerTile extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
-            child: Image.asset(
-              banner.imageAsset,
-              fit: BoxFit.cover
+            child: Image.network(
+              banner.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: AppTheme.stone.withOpacity(0.4)
+              ),
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: AppTheme.stone.withOpacity(0.3)
+                );
+              }
             )
           )
         )

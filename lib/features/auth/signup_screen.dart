@@ -38,11 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
     if (name.isEmpty) {
-      showMessage(context, "Enter your first and last name");
-      return;
-    }
-    if (!RegExp(r"\\S+\\s+\\S+").hasMatch(name)) {
-      showMessage(context, "Please enter both first and last name");
+      showMessage(context, "Enter your name");
       return;
     }
     if (password.isEmpty) {

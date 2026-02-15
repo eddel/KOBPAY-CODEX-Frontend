@@ -23,6 +23,7 @@ class SessionStore extends ChangeNotifier {
   Map<String, dynamic>? user;
   Map<String, dynamic>? wallet;
   List<Map<String, dynamic>>? recentTransactions;
+  List<Map<String, dynamic>>? banners;
   String? userEmail;
   bool biometricsEnabled = false;
   bool biometricUnlockEnabled = false;
@@ -175,6 +176,17 @@ class SessionStore extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchBanners() async {
+    final response = await _api.get("/api/banners", auth: false);
+    if (response is Map && response["banners"] is List) {
+      banners = (response["banners"] as List)
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+      notifyListeners();
+    }
+  }
+
   Future<void> refreshSecuritySettings() async {
     final response = await _api.get("/api/security/settings");
     if (response is Map && response["settings"] is Map) {
@@ -228,6 +240,7 @@ class SessionStore extends ChangeNotifier {
     user = null;
     wallet = null;
     recentTransactions = null;
+    banners = null;
     userEmail = null;
     hasPin = false;
     hasPassword = false;
