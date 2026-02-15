@@ -869,54 +869,9 @@ class _BannerTile extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  banner.imageAsset,
-                  fit: BoxFit.cover
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.black.withOpacity(0.55),
-                        Colors.black.withOpacity(0.05)
-                      ],
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight
-                    )
-                  )
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        banner.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white)
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        banner.subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.white70)
-                      )
-                    ]
-                  )
-                )
-              ]
+            child: Image.asset(
+              banner.imageAsset,
+              fit: BoxFit.cover
             )
           )
         )
