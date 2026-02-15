@@ -34,11 +34,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const AppScaffold(
-      title: "KOBPAY",
-      showBack: false,
-      child: Center(
-        child: CircularProgressIndicator()
+    final size = MediaQuery.of(context).size;
+    final logoSize = (size.shortestSide * 1.31625).clamp(438.75, 643.5);
+    return Scaffold(
+      backgroundColor: const Color(0xFF1F40E0),
+      body: Center(
+        child: SizedBox(
+          width: logoSize,
+          height: logoSize,
+          child: Image.asset(
+            "assets/splash/splash.png",
+            fit: BoxFit.contain
+          )
+        )
       )
     );
   }
