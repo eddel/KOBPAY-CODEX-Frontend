@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
+import "../../core/theme/app_theme.dart";
 import "../../store/session_store.dart";
 import "../../shared/widgets.dart";
 
@@ -37,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final size = MediaQuery.of(context).size;
     final logoSize = (size.shortestSide * 1.31625).clamp(438.75, 643.5);
     return Scaffold(
-      backgroundColor: const Color(0xFF1F40E0),
+      backgroundColor: AppTheme.seed,
       body: Center(
         child: SizedBox(
           width: logoSize,
