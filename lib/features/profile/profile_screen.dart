@@ -583,37 +583,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.password
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Enable Biometrics",
-                        style: Theme.of(context).textTheme.bodyMedium
-                      )
-                    ),
-                    if (_checkingBio)
-                      const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2)
-                      )
-                    else
-                      Switch(
-                        value: session.biometricsEnabled,
-                        onChanged: _bioSupported
-                            ? (value) => _toggleBiometrics(context, value)
-                            : null
-                      )
-                  ]
-                ),
-                if (!_bioSupported)
-                  Text(
-                    "Not available on this device",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.black54)
+                InkWell(
+                  onTap: () => showMessage(context, "Coming soon"),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "Enable Biometrics",
+                            style: Theme.of(context).textTheme.bodyMedium
+                          )
+                        ),
+                        if (_checkingBio)
+                          const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2)
+                          )
+                        else
+                          IgnorePointer(
+                            child: Switch(
+                              value: session.biometricsEnabled,
+                              onChanged: null
+                            )
+                          )
+                      ]
+                    )
                   )
+                )
               ]
             )
           ),
