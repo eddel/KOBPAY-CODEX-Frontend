@@ -17,6 +17,27 @@ class _BillPaymentStatusScreenState extends State<BillPaymentStatusScreen> {
   String? _status;
   Map<String, dynamic>? _receipt;
 
+  String _extractToken(Map<String, dynamic>? receipt) {
+    if (receipt == null) return "";
+    final meta = asStringKeyMap(receipt["meta"]);
+    final metaReceipt = asStringKeyMap(meta["receipt"]);
+    final metaProvider = asStringKeyMap(meta["provider"]);
+    final metaProviderDescription = asStringKeyMap(metaProvider["description"]);
+    return pickString(
+      receipt,
+      ["token"],
+      pickString(
+        metaReceipt,
+        ["token", "Token"],
+        pickString(
+          metaProviderDescription,
+          ["Token", "token"],
+          pickString(metaProvider, ["Token", "token"], "")
+        )
+      )
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -56,6 +77,7 @@ class _BillPaymentStatusScreenState extends State<BillPaymentStatusScreen> {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
     final reference = args["reference"]?.toString() ?? "";
+    final token = _extractToken(_receipt);
 
     return AppScaffold(
       title: "Payment Status",
@@ -96,6 +118,7 @@ class _BillPaymentStatusScreenState extends State<BillPaymentStatusScreen> {
                     "Total: ${formatKobo(((_receipt?["totalKobo"] as num?) ?? 0).round())}"
                   ),
                   Text("Status: ${_receipt?["status"] ?? ""}"),
+                  if (token.isNotEmpty) Text("Token: $token"),
                   Text("Provider: ${_receipt?["provider"] ?? ""}")
                 ]
               )

@@ -75,6 +75,26 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     final category = pickString(receipt, ["category"], pickString(tx, ["category"], ""));
     final type = pickString(receipt, ["type"], pickString(tx, ["type"], ""));
     final createdAt = pickString(receipt, ["createdAt"], pickString(tx, ["createdAt"], ""));
+    final meta = asStringKeyMap(receipt["meta"]);
+    final metaReceipt = asStringKeyMap(meta["receipt"]);
+    final metaProvider = asStringKeyMap(meta["provider"]);
+    final metaProviderDescription = asStringKeyMap(metaProvider["description"]);
+    final token = pickString(
+      receipt,
+      ["token"],
+      pickString(
+        metaReceipt,
+        ["token", "Token"],
+        pickString(
+          metaProviderDescription,
+          ["Token", "token"],
+          pickString(metaProvider, ["Token", "token"], "")
+        )
+      )
+    );
+    final isElectricity = category.trim().toLowerCase() == "electricity";
+    final showToken =
+        isElectricity && token.isNotEmpty && status.trim().toLowerCase() == "success";
 
     final receiptWidget = ReceiptPreview(
       title: "Transaction",
@@ -85,6 +105,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       items: [
         ReceiptItem(label: "Category", value: category.isEmpty ? "Transaction" : category),
         if (type.isNotEmpty) ReceiptItem(label: "Type", value: type),
+        if (showToken) ReceiptItem(label: "Token", value: token),
         ReceiptItem(label: "Fee", value: formatKobo(feeKobo)),
         ReceiptItem(label: "Total", value: formatKobo(totalKobo))
       ]
