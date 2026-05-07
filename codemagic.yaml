@@ -25,6 +25,12 @@ workflows:
           include: true
           source: true
       cancel_previous_builds: true
+       script:
+  - name: Install pods
+    script: |
+      cd ios
+      pod repo update
+      pod install
     scripts:
       - name: Show tool versions
         script: |
