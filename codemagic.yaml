@@ -47,6 +47,10 @@ workflows:
             --build-name=0.1.1 \
             --build-number=$BUILD_NUMBER \
             --dart-define=API_BASE_URL=$API_BASE_URL
+            - name: Clean Flutter
+  script: |
+    flutter clean
+    flutter pub get
     artifacts:
       - build/ios/iphoneos/*.app
       - /tmp/xcodebuild_logs/*.log
