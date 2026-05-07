@@ -31,4 +31,4 @@ Workflows:
 - `ios-unsigned`: builds iOS without code signing to verify the project compiles on Codemagic.
 - `ios-app-store`: builds a signed IPA using Codemagic iOS signing.
 
-Before running `ios-app-store`, update `APP_STORE_APPLE_ID` in `codemagic.yaml` and configure the `KOBPAY_APP_STORE_CONNECT` integration plus the matching iOS signing assets in Codemagic.
+Before running `ios-app-store`, create a Codemagic environment variable group named `app_store_credentials` with `APP_STORE_APPLE_ID`, then configure the `KOBPAY_APP_STORE_CONNECT` integration plus the matching iOS signing assets in Codemagic.

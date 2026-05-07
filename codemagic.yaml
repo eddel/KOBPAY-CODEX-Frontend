@@ -52,6 +52,8 @@ workflows:
     integrations:
       app_store_connect: KOBPAY_APP_STORE_CONNECT
     environment:
+      groups:
+        - app_store_credentials
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -60,7 +62,6 @@ workflows:
         bundle_identifier: com.kob.kobpay
       vars:
         API_BASE_URL: https://kobpay-codex-backend.onrender.com
-        APP_STORE_APPLE_ID: 0000000000
     cache:
       cache_paths:
         - $HOME/.pub-cache
